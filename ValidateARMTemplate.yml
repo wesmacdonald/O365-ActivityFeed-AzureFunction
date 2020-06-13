@@ -4,14 +4,10 @@ pool:
   vmImage: 'windows-latest'
 
 stages:
-  - stage: ARM_CI
+  - stage: ARMCI
     jobs:
-    - job: ARM_Testing
+    - job: ARMTesting
       steps:
-        - pwsh: ./InitializePipeline.ps1
-          displayName: Prepare folders
-          name: PsBuild
-
         - task: RunARMTTKTests@1
           displayName: Run ARM TTK tests 
           name: TTKtests
@@ -26,4 +22,3 @@ stages:
             testResultsFormat: 'NUnit'
             testResultsFiles: '$(System.DefaultWorkingDirectory)\results\*-armttk.xml'
           condition: always()
-          
