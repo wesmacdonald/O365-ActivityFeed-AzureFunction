@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "functionName": {
+        "value": "devGatherActivity"
+      },
+      "storageName": {
+        "value": "devGatherActivityStorage"
+      },
+      "storageSKU": {
+        "value": "Standard_LRS"
+      },
+      "location": {
+        "value": "CC"
+      },
+      "serverPlanName": {
+        "value": "devPlan"
+      },
+      "resourceTags": {
+        "value": {
+          "Environment": "Dev",
+          "Project": "GatherActivity"
+        }
+      }
+    }
+  }
