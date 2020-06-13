@@ -8,8 +8,8 @@ stages:
     jobs:
     - job: ARMTesting
       steps:
-        - script: mkdir '$(System.DefaultWorkingDirectory)\results'
-          displayName: 'Create results folder'
+        - pwsh: mkdir "$(System.DefaultWorkingDirectory)\results"
+          displayName: Create results folder
 
         - task: RunARMTTKTests@1
           displayName: Run ARM TTK tests 
