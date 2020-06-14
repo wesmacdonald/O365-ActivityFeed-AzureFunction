@@ -57,7 +57,8 @@
             "kind": "StorageV2",
             "tags": "[parameters('resourceTags')]",
             "properties": {
-                "accountType": "Standard_LRS"
+                "accountType": "Standard_LRS",
+                "supportsHttpsTrafficOnly": true
             }
         },
         {
