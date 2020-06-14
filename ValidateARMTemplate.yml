@@ -26,7 +26,7 @@ stages:
             testResultsFormat: 'NUnit'
             testResultsFiles: '$(System.DefaultWorkingDirectory)\results\*-armttk.xml'
           condition: always()
-  - stage: Validate ARM Template
+  - stage: ValidateARM
     jobs:
     - job: ARMValidation
       steps:
