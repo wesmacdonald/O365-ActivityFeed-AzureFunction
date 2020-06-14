@@ -40,9 +40,9 @@ stages:
           action: 'Create Or Update Resource Group'
           resourceGroupName: 'AzSK-RG'
           location: 'Canada Central'
-          templateLocation: 'URL of the file'
-          csmFileLink: '$(System.DefaultWorkingDirectory)/scripts/DeployAzureFunction.json'
-          csmParametersFileLink: '$(System.DefaultWorkingDirectory)/scripts/azuredeploy.parameters.dev.json'
+          templateLocation: 'Linked artifact'
+          csmFileLink: 'scripts/DeployAzureFunction.json'
+          csmParametersFileLink: 'scripts/azuredeploy.parameters.dev.json'
           deploymentMode: 'Validation'
       - task: AzSKARMTemplateChecker@4
         displayName: Validate ARM Template Security
