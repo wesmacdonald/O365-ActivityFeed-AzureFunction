@@ -27,6 +27,7 @@ stages:
             testResultsFiles: '$(System.DefaultWorkingDirectory)\results\*-armttk.xml'
           condition: always()
   - stage: ValidateARM
+    condition: always()
     jobs:
     - job: ARMValidation
       steps:
