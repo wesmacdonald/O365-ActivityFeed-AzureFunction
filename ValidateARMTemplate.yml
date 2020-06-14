@@ -5,6 +5,7 @@ pool:
 
 stages:
   - stage: ARMCI
+    condition: false
     jobs:
     - job: ARMTesting
       steps:
@@ -25,3 +26,25 @@ stages:
             testResultsFormat: 'NUnit'
             testResultsFiles: '$(System.DefaultWorkingDirectory)\results\*-armttk.xml'
           condition: always()
+  - stage: Validate ARM Template
+    jobs:
+    - job: ARMValidation
+      steps:
+      - task: AzureResourceManagerTemplateDeployment@3
+        displayName: Validate ARM Template
+        inputs:
+          deploymentScope: 'Resource Group'
+          azureResourceManagerConnection: 'Visual Studio Premium with MSDN(5f478995-39e1-49a0-9ef9-fb48dd84c58e)'
+          subscriptionId: '5f478995-39e1-49a0-9ef9-fb48dd84c58e'
+          action: 'Create Or Update Resource Group'
+          resourceGroupName: 'AzSK-RG'
+          location: 'Canada Central'
+          templateLocation: 'URL of the file'
+          csmFileLink: '$(System.DefaultWorkingDirectory)/scripts/DeployAzureFunction.json'
+          csmParametersFileLink: '$(System.DefaultWorkingDirectory)/scripts/azuredeploy.parameters.dev.json'
+          deploymentMode: 'Validation'
+      - task: AzSKARMTemplateChecker@4
+        displayName: Validate ARM Template Security
+        inputs:
+          ARMTemplateFilePath: '$(System.DefaultWorkingDirectory)/scripts/DeployAzureFunction.json'
+          ARMTemplateParameterFilePath: '$(System.DefaultWorkingDirectory)/scripts/azuredeploy.parameters.dev.json'
