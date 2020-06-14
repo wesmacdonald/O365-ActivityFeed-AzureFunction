@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "functionName": {
@@ -27,13 +27,19 @@
             ]
         },
         "location": {
-            "type": "string",
-            "defaultValue": "[resourceGroup().location]"
+            "type": "string"
         },
         "serverPlanName": {
             "type": "string",
             "minLength": 3,
             "maxLength": 24
+        },
+        "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+                "Environment": "Dev",
+                "Project": "GatherActivity"
+            }
         }
     },
     "variables": {
@@ -49,9 +55,7 @@
                 "name": "[parameters('storageSKU')]"
             },
             "kind": "StorageV2",
-            "tags": {
-                "displayName": "[parameters('storageName')]"
-            },
+            "tags": "[parameters('resourceTags')]",
             "properties": {
                 "accountType": "Standard_LRS"
             }
@@ -65,9 +69,7 @@
                 "name": "Y1",
                 "tier": "Dynamic"
             },
-            "tags": {
-                "displayName": "[parameters('serverPlanName')]"
-            },
+            "tags": "[parameters('resourceTags')]",
             "properties": {
                 "name": "[parameters('serverPlanName')]"
             }
@@ -91,6 +93,7 @@
             "type": "Microsoft.Web/sites",
             "name": "[parameters('functionName')]",
             "location": "[resourceGroup().location]",
+            "tags": "[parameters('resourceTags')]",
             "kind": "functionapp",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms',parameters('serverPlanName'))]",
