@@ -32,7 +32,6 @@ stages:
     - job: ARMValidation
       steps:
       - task: AzureResourceManagerTemplateDeployment@3
-        displayName: Validate ARM Template
         inputs:
           deploymentScope: 'Resource Group'
           azureResourceManagerConnection: 'Visual Studio Premium with MSDN(5f478995-39e1-49a0-9ef9-fb48dd84c58e)'
@@ -41,8 +40,8 @@ stages:
           resourceGroupName: 'AzSK-RG'
           location: 'Canada Central'
           templateLocation: 'Linked artifact'
-          csmFileLink: 'scripts/DeployAzureFunction.json'
-          csmParametersFileLink: 'scripts/azuredeploy.parameters.dev.json'
+          csmFile: '$(System.DefaultWorkingDirectory)/scripts/DeployAzureFunction.json'
+          csmParametersFile: '$(System.DefaultWorkingDirectory)/scripts/azuredeploy.parameters.dev.json'
           deploymentMode: 'Validation'
       - task: AzSKARMTemplateChecker@4
         displayName: Validate ARM Template Security
