@@ -80,9 +80,7 @@
             "type": "Microsoft.Insights/components",
             "kind": "web",
             "location": "[parameters('location')]",
-            "tags": {
-                "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('functionName'))]": "Resource"
-            },
+            "tags": "[parameters('resourceTags')]",
             "properties": {
                 "Application_Type": "web",
                 "ApplicationId": "[variables('applicationInsightsName')]"
