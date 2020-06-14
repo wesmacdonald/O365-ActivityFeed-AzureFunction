@@ -12,7 +12,7 @@
         "value": "Standard_LRS"
       },
       "location": {
-        "value": "CC"
+        "value": "canadacentral"
       },
       "serverPlanName": {
         "value": "devPlan"
