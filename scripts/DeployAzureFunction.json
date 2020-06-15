@@ -92,6 +92,9 @@
             "type": "Microsoft.Web/sites",
             "name": "[parameters('functionName')]",
             "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "tags": "[parameters('resourceTags')]",
             "kind": "functionapp",
             "dependsOn": [
