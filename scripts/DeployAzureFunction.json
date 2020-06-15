@@ -100,6 +100,7 @@
                 "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
             ],
             "properties": {
+                "httpsOnly": true,
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverPlanName'))]",
                 "siteConfig": {
                     "appSettings": [
