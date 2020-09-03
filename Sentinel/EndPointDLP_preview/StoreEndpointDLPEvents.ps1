@@ -8,7 +8,7 @@ $CustomerId = $env:workspaceId
 $SharedKey = $env:workspaceKey
 
 # Specify the name of the record type that you'll be creating
-$LogType = $env:customLogName
+$LogType = "endpointdlp"
 
 #SharePoint Site US
 $SPUS = $env:SPUS
@@ -19,7 +19,7 @@ $TimeStampField = (Get-Date)
 
 #Initiate Arrays used by the function
 $records = @()
-$exupload = @()
+$endpointupload = @()
 $spoupload = @()
 $usWorkspace = @()
 $tolocal = @()
@@ -114,79 +114,29 @@ $bodyG = @{grant_type="client_credentials";resource=$resourceG;client_id=$Client
 $oauthG = Invoke-RestMethod -Method Post -Uri $loginURL/$tenantdomain/oauth2/token?api-version=1.0 -Body $bodyG 
 $headerParamsG  = @{'Authorization'="$($oauthG.token_type) $($oauthG.access_token)"}
 
-
 Foreach ($user in $records) {
-#Exchange and Teams upload data process
-$user.workload
-if (($user.workload -eq "Exchange") -or ($user.Workload -eq "MicrosoftTeams")) {
 
- #Determine if the email is from external or internal if from external associate with first recipient on the to line
-    if (($env:domains).split(",") -Contains ($user.ExchangeMetaData.from.Split('@'))[1]) {$exuser = $user.ExchangeMetaData.from}
+#EndpointDLP upload
+if ($user.Workload -eq "Endpoint")     {
 
-    if ([string]::IsNullOrEmpty($exuser)) 
-        {
-          $tolocal = $user.ExchangeMetaData.to | select-string -pattern ($env:domains).split(",") -simplematch
-          $exuser = $tolocal[0]
-        }
-
-#Avoiding enrichment for system messages that may have slipped through
-    $systemMail = "no-reply@sharepointonline.com,noreply@email.teams.microsoft.com"
-    if (($systemMail).split(",") -notcontains $exuser) {
-        
-        #Add the additional attributes needed to enrich the event stored in Log Analytics for Exchange
-        $queryString = "https://graph.microsoft.com/v1.0/users/" + $exuser + "?" + "$" + "select=usageLocation,Manager,department,state"       
-        $info = Invoke-RestMethod -Headers $headerParamsG -Uri $queryString -Method GET
-
-        #Add usage location from GRAPH Call
-        $user | Add-Member -MemberType NoteProperty -Name "usageLocation" -Value $info.usageLocation
-         if ($info) {$user | Add-Member -MemberType NoteProperty -Name "department" -Value $info.department}
-
-        $querymanager = "https://graph.microsoft.com/v1.0/users/" + $exuser + "/manager"
-        $manager = Invoke-RestMethod -Headers $headerParamsG -Uri $querymanager
-        if ($manager) {$user | Add-Member -MemberType NoteProperty -Name "manager" -Value $manager.mail}
-        
-    if ($user.workload -eq "Exchange") {
-
-            #Add link to the location of the original content !!!! Remember to add per Geo depending on Geo
-            $original = $user.ExchangeMetaData.MessageID -replace ("\<", "_") -replace ("\>", "_")
-            $spousLocation = $SPUS + $user.PolicyDetails.rules.RuleName + "/" + $original + ".eml"
-            $spoSELocation = $SPUS + $user.PolicyDetails.rules.RuleName +  "/" + $original + ".eml"
-                
-                #Determine SPO Geo to point to this is pointing to the US sample, only Exchange provide full content
-                if (($user.usageLocation -eq "US") -and ($user.workload -eq "Exchange"))  {$user | Add-Member -MemberType NoteProperty -Name "originalContent" -Value $spousLocation}
-                if (($user.usageLocation -ne "US") -and ($user.workload -eq "Exchange"))  {$user | Add-Member -MemberType NoteProperty -Name "originalContent" -Value $spousLocation}
-   
-                                                            }   
-      Clear-Variable -name info                                                                                                         
-                                                         }
-$exupload += $user 
-                                    }
-
-#SharePoint and OneDrive upload data process
-if (($user.Workload -eq "OneDrive") -or ($user.Workload -eq "SharePoint")) {
-
-    #Add the additional attributes needed to enrich the event stored in Log Analytics for SharePoint
-    $queryString = $user.SharePointMetaData.From + "?$" + "select=usageLocation,Manager,department,state"
+    #Add the additional attributes needed to enrich the event stored
+    $queryString = $user.UserKey + "?$" + "select=usageLocation,Manager,department,state"
     $info = Invoke-RestMethod -Headers $headerParamsG -Uri "https://graph.microsoft.com/v1.0/users/$queryString" -Method GET
     $user | Add-Member -MemberType NoteProperty -Name "usageLocation" -Value $info.usageLocation
      if ($info) {$user | Add-Member -MemberType NoteProperty -Name "department" -Value $info.department}
+     if ($user.objectId) {
+         $document = Split-Path $user.objectId -leaf
+         $user | Add-Member -MemberType NoteProperty -Name "DocumentName" -Value $document
+                         }
 
-        $querymanager = "https://graph.microsoft.com/v1.0/users/" + $user.SharePointMetaData.From + "/manager"
-        $manager = Invoke-RestMethod -Headers $headerParamsG -Uri $querymanager
-        if ($manager) {$user | Add-Member -MemberType NoteProperty -Name "manager" -Value $manager.mail}
-
-$spoupload += $user
+$endpointupload += $user
 Clear-Variable -name info
-                                                                            }
+                                          }
                              }    
 
 
 #Determine which Sentinel Workspace to route the information, remember to define the variable for each workspace as an array.
-foreach ($entry in $exupload)   {
-        if ($entry.usageLocation -eq "US") { $usWorkspace += $entry  }
-        if ($entry.usageLocation -ne "US")   { $usWorkspace += $entry  } 
-                                }
-foreach ($entry in $spoupload)  {
+foreach ($entry in $endpointupload)  {
         if ($entry.usageLocation -eq "US") { $usWorkspace += $entry  }    
         if ($entry.usageLocation -ne "US")   { $usWorkspace += $entry  } 
                                 }
